@@ -56,6 +56,7 @@ echo "Creating student information file..."
 cat > student_info.txt << EOF
 ENROLLMENT_ID: $ENROLLMENT_ID
 STUDENT_NAME: $STUDENT_NAME
+EXAM_CODE: $EXAM_CODE
 EOF
 
 # Construct download URL for the exam zip file from Vercel Blob
@@ -115,7 +116,7 @@ echo ""
 
 # Make only solution files writable
 echo "Making solution files editable..."
-chmod +w problem*_solution.py answers.txt 2>/dev/null || true
+chmod +w prob_* 2>/dev/null || true
 
 # Append start time (UTC) to student_info.txt
 echo "START_TIME_UTC: $(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> student_info.txt
@@ -178,13 +179,16 @@ fi
 
 # Lock solution files
 echo "Locking files..."
-chmod -w problem*_solution.py answers.txt 2>/dev/null || true
+chmod -w prob_* 2>/dev/null || true
 
 echo "Preparing submission for Enrollment ID: $CONFIRMED_ID"
 echo ""
 
+# Extract EXAM_CODE from student_info.txt
+EXAM_CODE=$(grep 'EXAM_CODE:' student_info.txt | cut -d' ' -f2)
+
 # Create submission zip file name
-SUBMISSION_FILE="${CONFIRMED_ID}_submission.zip"
+SUBMISSION_FILE="${EXAM_CODE}_${CONFIRMED_ID}.zip"
 
 # Remove old submission file if it exists
 if [ -f "$SUBMISSION_FILE" ]; then
@@ -198,8 +202,8 @@ echo "Collecting solution files..."
 # Create temporary list of files to zip
 TEMP_FILE_LIST=$(mktemp)
 
-# Look for solution files (customize these patterns as needed)
-find . -maxdepth 1 \( -name "*solution*.py" -o -name "*solution*.txt" -o -name "answers.txt" -o -name "answer.txt" \) -type f > "$TEMP_FILE_LIST" 2>/dev/null || true
+# Look for solution files (prob_* files)
+find . -maxdepth 1 -name "prob_*" -type f > "$TEMP_FILE_LIST" 2>/dev/null || true
 
 # Always include student_info.txt if it exists
 if [ -f "student_info.txt" ]; then
