@@ -30,7 +30,7 @@ A complete Python & Shell-based CLI system for conducting exams. Manages setup a
 
 1. **Download the setup script**:
    ```bash
-   curl -O https://raw.githubusercontent.com/abirmondal/py-exam-cli/main/setup.sh
+   curl -O https://raw.githubusercontent.com/<git-username>/<repository-name>/main/setup.sh
    ```
 
 2. **Make it executable and run**:
