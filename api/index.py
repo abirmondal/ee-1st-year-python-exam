@@ -5,7 +5,7 @@ Submission-only system - TAs download submissions for manual grading
 """
 
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 import io
 import zipfile
 from vercel_blob import put
@@ -17,16 +17,39 @@ app = FastAPI(title="Python Exam System API")
 MAX_FILE_SIZE = 10 * 1024 * 1024
 
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 async def root():
     """Root endpoint - API information"""
-    return {
-        "message": "Python Exam System API - Submission Only",
-        "version": "2.0.0",
-        "endpoints": {
-            "submit": "POST /api/submit"
-        }
-    }
+    return """
+    <html>
+        <head>
+            <title>Exam System API</title>
+            <style>
+                body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+                div { 
+                    width: 600px; margin: 5em auto; padding: 2em; 
+                    background-color: #f9f9f9; border-radius: 8px; 
+                    border: 1px solid #eee; text-align: center; 
+                }
+                code { background-color: #eee; padding: 3px 6px; border-radius: 4px; }
+                a { color: #0070f3; text-decoration: none; }
+                a:hover { text-decoration: underline; }
+                .star-request { margin-top: 1.5em; padding-top: 1.5em; border-top: 1px solid #ddd; font-size: 0.95em; }
+            </style>
+        </head>
+        <body>
+            <div>
+                <h1>Python Exam System API</h1>
+                <p>This is the backend API for the terminal-based exam system.</p>
+                <p>The API is active. The submission endpoint is at <code>/api/submit</code>.</p>
+                <p><i>Instructors: Please see the <a href="https://github.com/abirmondal/py-exam-cli" target="_blank">GitHub repository</a> for setup and usage instructions.</i></p>
+                <div class="star-request">
+                    <p>⭐ If you find this project useful, please consider giving it a star on <a href="https://github.com/abirmondal/py-exam-cli" target="_blank">GitHub</a>!</p>
+                </div>
+            </div>
+        </body>
+    </html>
+    """
 
 
 @app.post("/api/submit")

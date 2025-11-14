@@ -471,6 +471,38 @@ If you need to access the API from a web interface, add CORS middleware in `api/
 5. Unzip and grade using preferred methods/tools
 6. Access complete timing data in each submission's `student_info.txt`
 
+## 🔄 Syncing Updates from the Template
+
+When you create a repository from this template, it's a one-time copy. It does not automatically receive updates if the main template is improved or fixed.
+
+To pull in new updates from the main template, you must add it as a remote (you only need to do this once):
+
+```bash
+# 1. Add the main template as a remote named "upstream"
+git remote add upstream https://github.com/abirmondal/py-exam-cli.git
+```
+
+Then, whenever you want to check for and merge updates:
+
+```bash
+# 2. Fetch the latest changes from the template
+git fetch upstream
+
+# 3. Merge the changes from the template's main branch into your main branch
+git merge upstream/main
+```
+
+**Note:** If you have made your own changes to files that also changed in the template (like `setup.sh`), you may have to resolve merge conflicts.
+
+After syncing updates, remember to redeploy to Vercel:
+
+```bash
+# If using GitHub integration, just push:
+git push origin main
+
+# If using Vercel CLI:
+vercel --prod
+```
 ## Conclusion
 
 Your Terminal-Based Python Exam System is now deployed and ready to use! Students can download the setup script, take exams, and submit their work. You download submissions from Blob Storage for manual/local grading.

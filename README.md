@@ -288,7 +288,28 @@ find . -maxdepth 1 -name "prob_*" -type f
 - Ensure the zip file is valid
 - Check internet connection
 
+## 🔄 Syncing Updates from the Template
 
+When you create a repository from this template, it's a one-time copy. It does not automatically receive updates if the main template is improved or fixed.
+
+To pull in new updates from the main template, you must add it as a remote (you only need to do this once):
+
+```bash
+# 1. Add the main template as a remote named "upstream"
+git remote add upstream https://github.com/abirmondal/py-exam-cli.git
+```
+
+Then, whenever you want to check for and merge updates:
+
+```bash
+# 2. Fetch the latest changes from the template
+git fetch upstream
+
+# 3. Merge the changes from the template's main branch into your main branch
+git merge upstream/main
+```
+
+**Note:** If you have made your own changes to files that also changed in the template (like `setup.sh`), you may have to resolve merge conflicts.
 
 ## 📄 License
 
