@@ -61,7 +61,7 @@ EOF
 
 # Construct download URL for the exam zip file from Vercel Blob
 # TODO: Update this URL with your Vercel Blob project's public URL
-VERCEL_BLOB_BASE_URL="https://[YOUR-VERCEL-PROJECT-ID].blob.vercel-storage.com"
+VERCEL_BLOB_BASE_URL="https://kbnyowyqydxghkjz.public.blob.vercel-storage.com"
 DOWNLOAD_URL="${VERCEL_BLOB_BASE_URL}/public-exams/${EXAM_CODE}.zip"
 
 echo "Downloading exam files..."
