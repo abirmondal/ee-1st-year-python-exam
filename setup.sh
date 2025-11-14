@@ -25,7 +25,7 @@ if [ -z "$STUDENT_NAME" ]; then
 fi
 
 # Prompt for Exam Code
-read -p "Enter the Exam Code (e.g., cst101): " EXAM_CODE
+read -p "Enter the Exam Code: " EXAM_CODE
 
 if [ -z "$EXAM_CODE" ]; then
     echo "Error: Exam Code cannot be empty."

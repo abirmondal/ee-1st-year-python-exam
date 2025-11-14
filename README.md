@@ -30,7 +30,7 @@ A complete Python & Shell-based CLI system for conducting exams. Manages setup a
 
 1. **Download the setup script**:
    ```bash
-   curl -O https://raw.githubusercontent.com/abirmondal/py-exam-cli/main/setup.sh
+   curl -O https://raw.githubusercontent.com/<git-username>/<repository-name>/main/setup.sh
    ```
 
 2. **Make it executable and run**:
@@ -126,41 +126,41 @@ A complete Python & Shell-based CLI system for conducting exams. Manages setup a
    
    # Create coding problem with question and answer space
    cat > prob_1.py << 'EOF'
-"""
-Problem 1: Hello World
-Write a Python program that prints "Hello, World!"
+   """
+   Problem 1: Hello World
+   Write a Python program that prints "Hello, World!"
 
-INSTRUCTIONS: Write your code below.
-"""
+   INSTRUCTIONS: Write your code below.
+   """
 
-# Write your code here
+   # Write your code here
 
-EOF
-   
+   EOF
+      
    # Create multiple choice questions
    cat > prob_mcq.txt << 'EOF'
-# INSTRUCTIONS: Write your answer directly after the colon for each question.
+   # INSTRUCTIONS: Write your answer directly after the colon for each question.
 
-Q1: What is the capital of France? :
-Q2: Which of the following are programming languages (choose all that apply)? :
-Q3: What is 2 + 2? :
+   Q1: What is the capital of France? :
+   Q2: Which of the following are programming languages (choose all that apply)? :
+   Q3: What is 2 + 2? :
 
-EOF
-   
-   # Create another coding problem
-   cat > prob_2.py << 'EOF'
-"""
-Problem 2: Sum Function
-Write a function that returns the sum of two numbers.
+   EOF
+      
+      # Create another coding problem
+      cat > prob_2.py << 'EOF'
+   """
+   Problem 2: Sum Function
+   Write a function that returns the sum of two numbers.
 
-INSTRUCTIONS: Complete the function below.
-"""
+   INSTRUCTIONS: Complete the function below.
+   """
 
-def sum_two(a, b):
-    # Write your code here
-    pass
+   def sum_two(a, b):
+      # Write your code here
+      pass
 
-EOF
+   EOF
    ```
 
 2. **Zip the exam**:
