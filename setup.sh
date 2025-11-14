@@ -90,11 +90,13 @@ fi
 echo "Download successful!"
 echo "Extracting exam files..."
 
-# Unzip the exam files
-if command -v unzip &> /dev/null; then
-    unzip -q "${EXAM_CODE}.zip"
+# Extract the exam files using Python's zipfile module
+if command -v python3 &> /dev/null; then
+    python3 -m zipfile -e "${EXAM_CODE}.zip" .
+elif command -v python &> /dev/null; then
+    python -m zipfile -e "${EXAM_CODE}.zip" .
 else
-    echo "Error: unzip command not found. Please install unzip."
+    echo "Error: Python is not installed. Please install Python 3."
     exit 1
 fi
 
