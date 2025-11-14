@@ -93,7 +93,7 @@ async def submit_exam(file: UploadFile = File(...)):
                 pathname=blob_path,
                 body=content,
                 options={
-                    'access': 'public',
+                    'access': 'private',
                     'addRandomSuffix': False
                 }
             )

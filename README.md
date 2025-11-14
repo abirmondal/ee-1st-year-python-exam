@@ -281,8 +281,8 @@ find . -maxdepth 1 -name "prob_*" -type f
 ### Students Cannot Download Exam
 
 - Verify the exam code is correct
-- Check that the zip file exists in `public/exam_files/`
-- Ensure the GitHub raw URL is accessible
+- Check that the zip file exists in your Vercel Blob Storage under the `public-exams/` path
+- Ensure the `VERCEL_BLOB_BASE_URL` in `setup.sh` is correct and publicly accessible
 - Check internet connection
 
 ### Submission Fails

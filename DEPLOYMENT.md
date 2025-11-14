@@ -388,23 +388,6 @@ This is a **submission-only system**. To grade exams:
   3. Check file size (must be < 10MB)
   4. Test with: `curl -X POST -F "file=@submission.zip" https://your-url/api/submit`
 
-## Security Best Practices
-
-1. **Monitor Access**
-   - Review Vercel function logs regularly
-   - Watch for suspicious activity
-   - Set up alerts in Vercel dashboard
-
-3. **Backup Data**
-   - Regularly download submissions from Blob Storage
-   - Keep local backups of exam files
-   - Export grading results frequently
-
-4. **Access Control**
-   - Only share the grading endpoint with authorized personnel
-   - Keep the secret key confidential
-   - Use different secrets for different exam periods
-
 ## Cost Considerations
 
 ### Vercel Free Tier Limits
@@ -462,20 +445,6 @@ For issues or questions:
 2. Add your custom domain
 3. Configure DNS according to Vercel instructions
 4. Update the API URL in `setup.sh`
-
-### Function Timeout
-
-If grading takes too long, increase the timeout in `vercel.json`:
-
-```json
-{
-  "functions": {
-    "api/index.py": {
-      "maxDuration": 60
-    }
-  }
-}
-```
 
 ### CORS Configuration
 

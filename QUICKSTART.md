@@ -195,9 +195,9 @@ curl -X POST -F "file=@test.zip" https://your-project.vercel.app/api/submit
 ## Troubleshooting
 
 ### "Invalid Exam Code" Error
-- ✓ Check the zip file exists in `public/exam_files/`
+- ✓ Check the zip file exists in your Vercel Blob Storage under the `public-exams/` path
 - ✓ Verify the exam code matches the filename (without .zip)
-- ✓ Ensure the repository is public
+- ✓ Ensure the `VERCEL_BLOB_BASE_URL` in `setup.sh` is correct
 
 ### "Submission FAILED" Error
 - ✓ Check the Vercel URL is correct in `setup.sh`

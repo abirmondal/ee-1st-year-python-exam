@@ -237,7 +237,6 @@ Before submitting a PR, ensure:
 
 All contributions will be reviewed for:
 - Input validation
-- Authentication/authorization
 - Data protection
 - Error handling
 - Secure defaults
