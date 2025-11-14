@@ -242,7 +242,7 @@ echo "Uploading submission..."
 echo ""
 
 # TODO: Update with your actual Vercel deployment URL
-API_URL="https://your-vercel-deployment.vercel.app/api/submit"
+API_URL="https://ee-1st-year-python-exam-1x40g97yk.vercel.app/api/submit"
 
 # Upload using curl
 if command -v curl &> /dev/null; then
