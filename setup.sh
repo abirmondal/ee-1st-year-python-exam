@@ -43,12 +43,14 @@ echo ""
 EXAM_DIR="$HOME/exam_${ENROLLMENT_ID}"
 
 if [ -d "$EXAM_DIR" ]; then
-    echo "Info: Directory $EXAM_DIR already exists. Proceeding..."
+    echo "Error: Directory $EXAM_DIR already exists."
+    echo "To restart the exam setup, please manually delete the directory:"
+    echo "  rm -rf $EXAM_DIR"
+    exit 1
 else
     echo "Creating exam directory: $EXAM_DIR"
+    mkdir -p "$EXAM_DIR"
 fi
-
-mkdir -p "$EXAM_DIR"
 cd "$EXAM_DIR"
 
 # Create student_info.txt file
@@ -88,11 +90,13 @@ fi
 echo "Download successful!"
 echo "Extracting exam files..."
 
-# Unzip the exam files
-if command -v unzip &> /dev/null; then
-    unzip -q "${EXAM_CODE}.zip"
+# Extract the exam files using Python's zipfile module
+if command -v python3 &> /dev/null; then
+    python3 -m zipfile -e "${EXAM_CODE}.zip" .
+elif command -v python &> /dev/null; then
+    python -m zipfile -e "${EXAM_CODE}.zip" .
 else
-    echo "Error: unzip command not found. Please install unzip."
+    echo "Error: Python is not installed. Please install Python 3."
     exit 1
 fi
 
@@ -144,6 +148,16 @@ cat << 'SUBMIT_SCRIPT_EOF' > submit.sh
 # This script submits your exam answers
 
 set -e  # Exit on any error
+
+# Detect Python command
+if command -v python3 &> /dev/null; then
+    PYTHON_CMD="python3"
+elif command -v python &> /dev/null; then
+    PYTHON_CMD="python"
+else
+    echo "Error: Python is not installed. Please install Python 3."
+    exit 1
+fi
 
 echo "=== Python Exam System - Submission ==="
 echo ""
@@ -223,7 +237,7 @@ if [ ! -s "$TEMP_FILE_LIST" ]; then
     # Create an empty zip
     touch placeholder.txt
     echo "No solution files found" > placeholder.txt
-    zip -q "$SUBMISSION_FILE" placeholder.txt
+    $PYTHON_CMD -m zipfile -c "$SUBMISSION_FILE" placeholder.txt
     rm placeholder.txt
 else
     # Create zip with solution files and student info
@@ -231,7 +245,8 @@ else
         echo "  Adding: $file"
     done < "$TEMP_FILE_LIST"
     
-    zip -q "$SUBMISSION_FILE" $(cat "$TEMP_FILE_LIST")
+    # Use Python zipfile module to create the zip
+    $PYTHON_CMD -m zipfile -c "$SUBMISSION_FILE" $(cat "$TEMP_FILE_LIST")
 fi
 
 rm "$TEMP_FILE_LIST"
