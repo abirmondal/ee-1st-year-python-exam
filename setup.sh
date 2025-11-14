@@ -213,7 +213,7 @@ fi
 # Check if any files were found
 if [ ! -s "$TEMP_FILE_LIST" ]; then
     echo "Warning: No solution files found."
-    echo "Looking for: *solution*.py, *solution*.txt, answers.txt"
+    echo "Looking for: prob_*"
     rm "$TEMP_FILE_LIST"
     read -p "Do you want to continue anyway? (y/n): " CONTINUE
     if [ "$CONTINUE" != "y" ] && [ "$CONTINUE" != "Y" ]; then

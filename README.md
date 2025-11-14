@@ -18,10 +18,6 @@ A complete Python & Shell-based CLI system for conducting exams. Manages setup a
 /
 ├── api/
 │   └── index.py              # FastAPI backend with /api/submit ONLY
-├── public/
-│   └── exam_files/
-│       ├── cst101.zip        # Example exam (Computer Science)
-│       └── phy102.zip        # Example exam (Physics)
 ├── setup.sh                  # Master setup script for students
 ├── requirements.txt          # Python dependencies for Vercel
 ├── vercel.json              # Vercel configuration

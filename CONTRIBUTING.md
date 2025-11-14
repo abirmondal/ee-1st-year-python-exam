@@ -71,8 +71,6 @@ Before submitting:
 /
 ├── api/
 │   └── index.py          # FastAPI backend - Add new endpoints here
-├── public/
-│   └── exam_files/       # Exam zip files - Add new exams here
 ├── setup.sh              # Student setup script
 ├── requirements.txt      # Python dependencies
 ├── vercel.json          # Vercel configuration
