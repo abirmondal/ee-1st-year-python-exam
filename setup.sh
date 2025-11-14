@@ -43,12 +43,14 @@ echo ""
 EXAM_DIR="$HOME/exam_${ENROLLMENT_ID}"
 
 if [ -d "$EXAM_DIR" ]; then
-    echo "Info: Directory $EXAM_DIR already exists. Proceeding..."
+    echo "Error: Directory $EXAM_DIR already exists."
+    echo "To restart the exam setup, please manually delete the directory:"
+    echo "  rm -rf $EXAM_DIR"
+    exit 1
 else
     echo "Creating exam directory: $EXAM_DIR"
+    mkdir -p "$EXAM_DIR"
 fi
-
-mkdir -p "$EXAM_DIR"
 cd "$EXAM_DIR"
 
 # Create student_info.txt file
