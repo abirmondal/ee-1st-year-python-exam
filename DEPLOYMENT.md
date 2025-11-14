@@ -234,13 +234,7 @@ curl -X POST -F "file=@test.zip" https://your-project.vercel.app/api/submit
 
 You should get a success response.
 
-### Test Grading Endpoint
 
-```bash
-curl "https://your-project.vercel.app/api/start-grading?secret=YOUR_SECRET_KEY"
-```
-
-Replace `YOUR_SECRET_KEY` with the value you set in environment variables.
 
 ## Add Exam Files
 
@@ -396,12 +390,7 @@ This is a **submission-only system**. To grade exams:
 
 ## Security Best Practices
 
-1. **Protect Your Secret Key**
-   - Never commit the `GRADING_SECRET` to the repository
-   - Use a strong, random value
-   - Rotate it periodically
-
-2. **Monitor Access**
+1. **Monitor Access**
    - Review Vercel function logs regularly
    - Watch for suspicious activity
    - Set up alerts in Vercel dashboard

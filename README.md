@@ -128,10 +128,43 @@ A complete Python & Shell-based CLI system for conducting exams. Manages setup a
    mkdir exam_content
    cd exam_content
    
-   # Create solution files using prob_* pattern
-   echo "# Student solution for Problem 1" > prob_1.py
-   echo "# Student solution for Problem 2" > prob_2.py
-   echo "Problem 3 answer:" > prob_3.txt
+   # Create coding problem with question and answer space
+   cat > prob_1.py << 'EOF'
+"""
+Problem 1: Hello World
+Write a Python program that prints "Hello, World!"
+
+INSTRUCTIONS: Write your code below.
+"""
+
+# Write your code here
+
+EOF
+   
+   # Create multiple choice questions
+   cat > prob_mcq.txt << 'EOF'
+# INSTRUCTIONS: Write your answer directly after the colon for each question.
+
+Q1: What is the capital of France? :
+Q2: Which of the following are programming languages (choose all that apply)? :
+Q3: What is 2 + 2? :
+
+EOF
+   
+   # Create another coding problem
+   cat > prob_2.py << 'EOF'
+"""
+Problem 2: Sum Function
+Write a function that returns the sum of two numbers.
+
+INSTRUCTIONS: Complete the function below.
+"""
+
+def sum_two(a, b):
+    # Write your code here
+    pass
+
+EOF
    ```
 
 2. **Zip the exam**:
@@ -212,10 +245,6 @@ Submit exam solutions.
    ```bash
    # Test submission
    curl -X POST -F "file=@test_submission.zip" http://localhost:8000/api/submit
-   
-   # Test grading (set GRADING_SECRET first)
-   export GRADING_SECRET="your-secret"
-   curl "http://localhost:8000/api/start-grading?secret=your-secret"
    ```
 
 ### Testing the Setup Script
@@ -231,19 +260,6 @@ Submit exam solutions.
 
 ## 📝 Customization
 
-### Modifying Answer Key
-
-Edit the `ANSWERS` dictionary in `api/index.py`:
-
-```python
-ANSWERS = {
-    "Q1": "A",
-    "Q2": "A,C",
-    "Q3": "B",
-    # Add more questions
-}
-```
-
 ### Changing File Size Limit
 
 Modify `MAX_FILE_SIZE` in `api/index.py`:
@@ -254,10 +270,10 @@ MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
 ### Solution File Patterns
 
-Edit the patterns in the dynamically created `submit.sh` (within `setup.sh`):
+To change which files are submitted, edit the `find` command inside the `submit.sh` HEREDOC in `setup.sh` (around line 203). The current pattern is `prob_*`:
 
 ```bash
-find . -maxdepth 1 \( -name "*solution*.py" -o -name "answers.txt" \) -type f
+find . -maxdepth 1 -name "prob_*" -type f
 ```
 
 ## 🐛 Troubleshooting
@@ -276,12 +292,7 @@ find . -maxdepth 1 \( -name "*solution*.py" -o -name "answers.txt" \) -type f
 - Ensure the zip file is valid
 - Check internet connection
 
-### Grading Fails
 
-- Verify `GRADING_SECRET` environment variable is set
-- Check Vercel Blob Storage configuration
-- Ensure submissions exist in Blob Storage
-- Check Vercel function logs for errors
 
 ## 📄 License
 
@@ -293,8 +304,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## ⚠️ Important Notes
 
-1. **Update URLs**: Before deployment, update the GitHub and Vercel URLs in `setup.sh`
-2. **Set Secret**: Always set a strong `GRADING_SECRET` environment variable
-3. **Test First**: Test the complete workflow before using in production
-4. **Backup**: Keep backups of exam files and submissions
-5. **Monitor**: Monitor Vercel function logs during exam periods
+1. **Update URLs**: Before deployment, update the Vercel Blob Storage URL and API URL in `setup.sh`
+2. **Test First**: Test the complete workflow before using in production
+3. **Backup**: Keep backups of exam files and submissions
+4. **Monitor**: Monitor Vercel function logs during exam periods

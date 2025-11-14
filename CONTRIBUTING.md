@@ -187,10 +187,6 @@ uvicorn api.index:app --reload
 ```bash
 # Test submission
 curl -X POST -F "file=@test.zip" http://localhost:8000/api/submit
-
-# Test grading (set GRADING_SECRET first)
-export GRADING_SECRET="test-secret"
-curl "http://localhost:8000/api/start-grading?secret=test-secret"
 ```
 
 ### Test Setup Script

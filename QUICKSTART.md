@@ -164,23 +164,11 @@ This is a **submission-only system**. Grade manually or use local automation.
 
 ## Common Commands
 
-### Update Answer Key
-
-Edit `api/index.py`:
-```python
-ANSWERS = {
-    "Q1": "A",
-    "Q2": "A,C",
-    "Q3": "B",
-    # Add more...
-}
-```
-
 ### Re-deploy After Changes
 
 ```bash
 git add .
-git commit -m "Update answer key"
+git commit -m "Update exam files"
 git push
 vercel --prod
 ```
@@ -216,9 +204,7 @@ curl -X POST -F "file=@test.zip" https://your-project.vercel.app/api/submit
 - ✓ Verify Blob Storage is configured
 - ✓ Test the API: `curl https://your-url.vercel.app/`
 
-### "Grading secret not configured"
-- ✓ Set `GRADING_SECRET` in Vercel environment variables
-- ✓ Redeploy after adding environment variables
+
 
 ---
 
