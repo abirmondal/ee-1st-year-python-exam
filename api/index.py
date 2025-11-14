@@ -32,6 +32,9 @@ async def root():
                     border: 1px solid #eee; text-align: center; 
                 }
                 code { background-color: #eee; padding: 3px 6px; border-radius: 4px; }
+                a { color: #0070f3; text-decoration: none; }
+                a:hover { text-decoration: underline; }
+                .star-request { margin-top: 1.5em; padding-top: 1.5em; border-top: 1px solid #ddd; font-size: 0.95em; }
             </style>
         </head>
         <body>
@@ -39,7 +42,10 @@ async def root():
                 <h1>Python Exam System API</h1>
                 <p>This is the backend API for the terminal-based exam system.</p>
                 <p>The API is active. The submission endpoint is at <code>/api/submit</code>.</p>
-                <p><i>Instructors: Please see the GitHub repository for setup and usage instructions.</i></p>
+                <p><i>Instructors: Please see the <a href="https://github.com/abirmondal/py-exam-cli" target="_blank">GitHub repository</a> for setup and usage instructions.</i></p>
+                <div class="star-request">
+                    <p>⭐ If you find this project useful, please consider giving it a star on <a href="https://github.com/abirmondal/py-exam-cli" target="_blank">GitHub</a>!</p>
+                </div>
             </div>
         </body>
     </html>
