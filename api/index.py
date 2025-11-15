@@ -148,7 +148,3 @@ async def submit_exam(file: UploadFile = File(...)):
             status_code=500,
             detail=f"An unexpected error occurred: {str(e)}"
         )
-
-
-# Vercel requires a handler for the serverless function
-# handler = app
