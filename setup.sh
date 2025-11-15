@@ -261,19 +261,19 @@ API_URL="https://ee-1st-year-python-exam-1x40g97yk.vercel.app/api/submit"
 
 # Upload using curl
 if command -v curl &> /dev/null; then
-    HTTP_CODE=$(curl -s -o /tmp/submit_response.txt -w "%{http_code}" -X POST -F "file=@${SUBMISSION_FILE}" "$API_URL")
+    HTTP_CODE=$(curl -s -o ./submit_response.txt -w "%{http_code}" -X POST -F "file=@${SUBMISSION_FILE};type=application/zip" "$API_URL")
     
     if [ "$HTTP_CODE" = "200" ]; then
         echo "✓ Submission Successful! Your exam is submitted."
         echo ""
-        cat /tmp/submit_response.txt 2>/dev/null || true
-        rm -f /tmp/submit_response.txt
+        cat ./submit_response.txt 2>/dev/null || true
+        rm -f ./submit_response.txt
         exit 0
     else
         echo "✗ Submission FAILED. Please check your internet and contact your TA immediately."
         echo "Error Code: $HTTP_CODE"
-        cat /tmp/submit_response.txt 2>/dev/null || true
-        rm -f /tmp/submit_response.txt
+        cat ./submit_response.txt 2>/dev/null || true
+        rm -f ./submit_response.txt
         exit 1
     fi
 else
