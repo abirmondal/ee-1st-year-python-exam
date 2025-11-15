@@ -43,12 +43,14 @@ echo ""
 EXAM_DIR="$HOME/exam_${ENROLLMENT_ID}"
 
 if [ -d "$EXAM_DIR" ]; then
-    echo "Info: Directory $EXAM_DIR already exists. Proceeding..."
+    echo "Error: Directory $EXAM_DIR already exists."
+    echo "To restart the exam setup, please manually delete the directory:"
+    echo "  rm -rf $EXAM_DIR"
+    exit 1
 else
     echo "Creating exam directory: $EXAM_DIR"
+    mkdir -p "$EXAM_DIR"
 fi
-
-mkdir -p "$EXAM_DIR"
 cd "$EXAM_DIR"
 
 # Create student_info.txt file
@@ -61,7 +63,7 @@ EOF
 
 # Construct download URL for the exam zip file from Vercel Blob
 # TODO: Update this URL with your Vercel Blob project's public URL
-VERCEL_BLOB_BASE_URL="https://[YOUR-VERCEL-PROJECT-ID].blob.vercel-storage.com"
+VERCEL_BLOB_BASE_URL="https://kbnyowyqydxghkjz.public.blob.vercel-storage.com"
 DOWNLOAD_URL="${VERCEL_BLOB_BASE_URL}/public-exams/${EXAM_CODE}.zip"
 
 echo "Downloading exam files..."
@@ -88,11 +90,13 @@ fi
 echo "Download successful!"
 echo "Extracting exam files..."
 
-# Unzip the exam files
-if command -v unzip &> /dev/null; then
-    unzip -q "${EXAM_CODE}.zip"
+# Extract the exam files using Python's zipfile module
+if command -v python3 &> /dev/null; then
+    python3 -m zipfile -e "${EXAM_CODE}.zip" .
+elif command -v python &> /dev/null; then
+    python -m zipfile -e "${EXAM_CODE}.zip" .
 else
-    echo "Error: unzip command not found. Please install unzip."
+    echo "Error: Python is not installed. Please install Python 3."
     exit 1
 fi
 
@@ -100,7 +104,7 @@ echo "Extraction complete!"
 
 # Set initial file permissions - make all files read-only
 echo "Setting initial file permissions..."
-chmod -w *.py *.txt 2>/dev/null || true
+chmod -w prob_* 2>/dev/null || true
 
 # Dynamically create start_exam.sh script
 echo "Creating exam start script..."
@@ -145,6 +149,16 @@ cat << 'SUBMIT_SCRIPT_EOF' > submit.sh
 
 set -e  # Exit on any error
 
+# Detect Python command
+if command -v python3 &> /dev/null; then
+    PYTHON_CMD="python3"
+elif command -v python &> /dev/null; then
+    PYTHON_CMD="python"
+else
+    echo "Error: Python is not installed. Please install Python 3."
+    exit 1
+fi
+
 echo "=== Python Exam System - Submission ==="
 echo ""
 
@@ -179,7 +193,7 @@ fi
 
 # Lock solution files
 echo "Locking files..."
-chmod -w prob_* 2>/dev/null || true
+chmod -w prob_* student_info.txt 2>/dev/null || true
 
 echo "Preparing submission for Enrollment ID: $CONFIRMED_ID"
 echo ""
@@ -223,7 +237,7 @@ if [ ! -s "$TEMP_FILE_LIST" ]; then
     # Create an empty zip
     touch placeholder.txt
     echo "No solution files found" > placeholder.txt
-    zip -q "$SUBMISSION_FILE" placeholder.txt
+    $PYTHON_CMD -m zipfile -c "$SUBMISSION_FILE" placeholder.txt
     rm placeholder.txt
 else
     # Create zip with solution files and student info
@@ -231,7 +245,8 @@ else
         echo "  Adding: $file"
     done < "$TEMP_FILE_LIST"
     
-    zip -q "$SUBMISSION_FILE" $(cat "$TEMP_FILE_LIST")
+    # Use Python zipfile module to create the zip
+    $PYTHON_CMD -m zipfile -c "$SUBMISSION_FILE" $(cat "$TEMP_FILE_LIST")
 fi
 
 rm "$TEMP_FILE_LIST"
@@ -242,23 +257,22 @@ echo "Uploading submission..."
 echo ""
 
 # TODO: Update with your actual Vercel deployment URL
-API_URL="https://your-vercel-deployment.vercel.app/api/submit"
+API_URL="https://ee-1st-year-python-exam.vercel.app/api/submit"
 
 # Upload using curl
 if command -v curl &> /dev/null; then
-    HTTP_CODE=$(curl -s -o /tmp/submit_response.txt -w "%{http_code}" -X POST -F "file=@${SUBMISSION_FILE}" "$API_URL")
+    HTTP_CODE=$(curl -s -o ./submit_response.txt -w "%{http_code}" -X POST -F "file=@${SUBMISSION_FILE};type=application/zip" "$API_URL")
     
     if [ "$HTTP_CODE" = "200" ]; then
         echo "✓ Submission Successful! Your exam is submitted."
         echo ""
-        cat /tmp/submit_response.txt 2>/dev/null || true
-        rm -f /tmp/submit_response.txt
+        rm -f ./submit_response.txt
         exit 0
     else
         echo "✗ Submission FAILED. Please check your internet and contact your TA immediately."
         echo "Error Code: $HTTP_CODE"
-        cat /tmp/submit_response.txt 2>/dev/null || true
-        rm -f /tmp/submit_response.txt
+        cat ./submit_response.txt 2>/dev/null || true
+        rm -f ./submit_response.txt
         exit 1
     fi
 else
