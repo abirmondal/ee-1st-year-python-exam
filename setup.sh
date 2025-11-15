@@ -104,7 +104,7 @@ echo "Extraction complete!"
 
 # Set initial file permissions - make all files read-only
 echo "Setting initial file permissions..."
-chmod -w *.py *.txt 2>/dev/null || true
+chmod -w prob_* 2>/dev/null || true
 
 # Dynamically create start_exam.sh script
 echo "Creating exam start script..."
@@ -193,7 +193,7 @@ fi
 
 # Lock solution files
 echo "Locking files..."
-chmod -w prob_* 2>/dev/null || true
+chmod -w prob_* student_info.txt 2>/dev/null || true
 
 echo "Preparing submission for Enrollment ID: $CONFIRMED_ID"
 echo ""
