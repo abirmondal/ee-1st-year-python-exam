@@ -151,4 +151,4 @@ async def submit_exam(file: UploadFile = File(...)):
 
 
 # Vercel requires a handler for the serverless function
-handler = app
+# handler = app
