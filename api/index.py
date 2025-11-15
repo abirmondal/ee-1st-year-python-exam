@@ -20,36 +20,100 @@ MAX_FILE_SIZE = 10 * 1024 * 1024
 @app.get("/", response_class=HTMLResponse)
 async def root():
     """Root endpoint - API information"""
-    return """
+    html_content = """
     <html>
         <head>
             <title>Exam System API</title>
             <style>
-                body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-                div { 
-                    width: 600px; margin: 5em auto; padding: 2em; 
-                    background-color: #f9f9f9; border-radius: 8px; 
-                    border: 1px solid #eee; text-align: center; 
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-height: 100vh;
+                    background-color: #f7f9fc;
+                    margin: 0;
+                    padding: 20px;
+                    box-sizing: border-box;
                 }
-                code { background-color: #eee; padding: 3px 6px; border-radius: 4px; }
-                a { color: #0070f3; text-decoration: none; }
-                a:hover { text-decoration: underline; }
-                .star-request { margin-top: 1.5em; padding-top: 1.5em; border-top: 1px solid #ddd; font-size: 0.95em; }
+                .card {
+                    background-color: #ffffff;
+                    border-radius: 16px;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.07);
+                    width: 100%;
+                    max-width: 600px;
+                    padding: 48px;
+                    box-sizing: border-box;
+                    text-align: center;
+                }
+                h1 {
+                    font-size: 28px;
+                    font-weight: 700;
+                    color: #111;
+                    margin-top: 0;
+                    margin-bottom: 16px;
+                }
+                p {
+                    font-size: 17px;
+                    color: #555;
+                    line-height: 1.7;
+                    margin-bottom: 16px;
+                }
+                code {
+                    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+                    background-color: #f0f0f0;
+                    padding: 4px 8px;
+                    border-radius: 6px;
+                    font-size: 0.95em;
+                    color: #111;
+                }
+                .footer {
+                    margin-top: 32px;
+                    padding-top: 32px;
+                    border-top: 1px solid #eaeaea;
+                    font-size: 15px;
+                    color: #777;
+                }
+                .footer p {
+                    font-size: 15px;
+                    color: #777;
+                    margin-bottom: 10px;
+                }
+                a {
+                    color: #0070f3;
+                    text-decoration: none;
+                    font-weight: 500;
+                }
+                a:hover {
+                    text-decoration: underline;
+                }
             </style>
         </head>
         <body>
-            <div>
+            <div class="card">
                 <h1>Python Exam System API</h1>
                 <p>This is the backend API for the terminal-based exam system.</p>
                 <p>The API is active. The submission endpoint is at <code>/api/submit</code>.</p>
-                <p><i>Instructors: Please see the <a href="https://github.com/abirmondal/py-exam-cli" target="_blank">GitHub repository</a> for setup and usage instructions.</i></p>
-                <div class="star-request">
-                    <p>⭐ If you find this project useful, please consider giving it a star on <a href="https://github.com/abirmondal/py-exam-cli" target="_blank">GitHub</a>!</p>
+                
+                <div class="footer">
+                    <p>
+                        Instructors: See the 
+                        <a href="https://github.com/abirmondal/py-exam-cli" target="_blank">GitHub repository</a> 
+                        for setup instructions.
+                    </p>
+                    <p style="margin-top:20px;">
+                        ⭐ If you find this project useful, please consider giving it a star on 
+                        <a href="https://github.com/abirmondal/py-exam-cli" target="_blank">GitHub</a>!
+                    </p>
+                    <p style="margin-top:20px; font-size: 14px; color: #999;">
+                        Developed by Abir Mondal
+                    </p>
                 </div>
             </div>
         </body>
     </html>
     """
+    return HTMLResponse(content=html_content, status_code=200)
 
 
 @app.post("/api/submit")
@@ -113,7 +177,7 @@ async def submit_exam(file: UploadFile = File(...)):
         
         try:
             blob = put(
-                pathname=blob_path,
+                blob_path,
                 body=content,
                 options={
                     'access': 'private',
