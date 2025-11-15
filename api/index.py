@@ -178,7 +178,7 @@ async def submit_exam(file: UploadFile = File(...)):
         try:
             blob = put(
                 blob_path,
-                body=content,
+                content,
                 options={
                     'access': 'private',
                     'addRandomSuffix': False
