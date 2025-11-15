@@ -266,7 +266,6 @@ if command -v curl &> /dev/null; then
     if [ "$HTTP_CODE" = "200" ]; then
         echo "✓ Submission Successful! Your exam is submitted."
         echo ""
-        cat ./submit_response.txt 2>/dev/null || true
         rm -f ./submit_response.txt
         exit 0
     else
