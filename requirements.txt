@@ -1,3 +1,4 @@
 fastapi
 python-multipart
 vercel-blob
+requests
