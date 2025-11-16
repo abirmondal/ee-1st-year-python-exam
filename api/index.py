@@ -11,9 +11,21 @@ import os
 import zipfile
 from vercel_blob import put
 from vercel_blob import list as blob_list, get as blob_get
+from pydantic import BaseModel
+from typing import Optional
 
 app = FastAPI(title="Python Exam System API")
 
+# Batch download request model, used for post requests
+class BatchDownloadRequest(BaseModel):
+    exam_code: str
+    secret: str
+
+# Single download request model, used for post requests
+class SingleDownloadRequest(BaseModel):
+    exam_code: str
+    student_id: str
+    secret: str
 
 # File size limit: 10MB
 MAX_FILE_SIZE = 10 * 1024 * 1024
@@ -220,29 +232,29 @@ async def submit_exam(file: UploadFile = File(...)):
         )
 
 
-@app.get("/api/download-batch")
-async def download_batch(exam_code: str, secret: str):
+@app.post("/api/download-batch")
+async def download_batch(request: BatchDownloadRequest):
     """
     Download all submissions for a given exam code as a single zip file.
     Requires authentication via DOWNLOAD_SECRET environment variable.
     """
     # Security: Validate secret
     download_secret = os.environ.get("DOWNLOAD_SECRET")
-    if not download_secret or download_secret != secret:
+    if not download_secret or download_secret != request.secret:
         raise HTTPException(
             status_code=401,
             detail="Unauthorized: Invalid or missing secret"
         )
     
     # Validate exam_code
-    if not exam_code or not exam_code.strip():
+    if not request.exam_code or not request.exam_code.strip():
         raise HTTPException(
             status_code=400,
             detail="Exam code is required"
         )
     
     # Construct the file prefix for submissions
-    file_prefix = f"submissions/{exam_code}_"
+    file_prefix = f"submissions/{request.exam_code}_"
     
     try:
         # List all blobs matching the prefix
@@ -253,7 +265,7 @@ async def download_batch(exam_code: str, secret: str):
         if not blobs:
             raise HTTPException(
                 status_code=404,
-                detail=f"No submissions found for exam code: {exam_code}"
+                detail=f"No submissions found for exam code: {request.exam_code}"
             )
         
         # Create a zip file in memory
@@ -269,7 +281,7 @@ async def download_batch(exam_code: str, secret: str):
                     # Format: submissions/{exam_code}_{student_id}.zip
                     pathname = blob.get('pathname', '')
                     filename = pathname.split('/')[-1]  # Get the filename
-                    student_id = filename.replace(f"{exam_code}_", "").replace(".zip", "")
+                    student_id = filename.replace(f"{request.exam_code}_", "").replace(".zip", "")
                     
                     # Unzip the student's submission in memory
                     student_zip = io.BytesIO(student_zip_content)
@@ -294,7 +306,7 @@ async def download_batch(exam_code: str, secret: str):
         memory_zip.seek(0)
         
         # Return the zip file as a streaming response
-        filename = f"{exam_code}_all_submissions.zip"
+        filename = f"{request.exam_code}_all_submissions.zip"
         return StreamingResponse(
             memory_zip,
             media_type="application/zip",
@@ -312,35 +324,35 @@ async def download_batch(exam_code: str, secret: str):
         )
 
 
-@app.get("/api/download-single")
-async def download_single(exam_code: str, student_id: str, secret: str):
+@app.post("/api/download-single")
+async def download_single(request: SingleDownloadRequest):
     """
     Download a single student's submission.
     Requires authentication via DOWNLOAD_SECRET environment variable.
     """
     # Security: Validate secret
     download_secret = os.environ.get("DOWNLOAD_SECRET")
-    if not download_secret or download_secret != secret:
+    if not download_secret or download_secret != request.secret:
         raise HTTPException(
             status_code=401,
             detail="Unauthorized: Invalid or missing secret"
         )
     
     # Validate parameters
-    if not exam_code or not exam_code.strip():
+    if not request.exam_code or not request.exam_code.strip():
         raise HTTPException(
             status_code=400,
             detail="Exam code is required"
         )
     
-    if not student_id or not student_id.strip():
+    if not request.student_id or not request.student_id.strip():
         raise HTTPException(
             status_code=400,
             detail="Student ID is required"
         )
     
     # Construct the exact blob path
-    blob_path = f"submissions/{exam_code}_{student_id}.zip"
+    blob_path = f"submissions/{request.exam_code}_{request.student_id}.zip"
     
     try:
         # Download the file directly using blob_get
@@ -349,7 +361,7 @@ async def download_single(exam_code: str, student_id: str, secret: str):
 
         # Create a streaming response
         file_stream = io.BytesIO(file_data)
-        filename = f"{exam_code}_{student_id}.zip"
+        filename = f"{request.exam_code}_{request.student_id}.zip"
 
         return StreamingResponse(
             file_stream,
@@ -367,7 +379,7 @@ async def download_single(exam_code: str, student_id: str, secret: str):
         if "not_found" in error_message.lower():
             raise HTTPException(
                 status_code=404,
-                detail=f"Submission not found for exam code: {exam_code}, student ID: {student_id}"
+                detail=f"Submission not found for exam code: {request.exam_code}, student ID: {request.student_id}"
             )
         # Otherwise, return a generic 500
         raise HTTPException(
