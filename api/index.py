@@ -13,9 +13,24 @@ import requests
 from vercel_blob import put
 from vercel_blob import list as blob_list
 from pydantic import BaseModel
-from typing import Optional
 
-app = FastAPI(title="Python Exam System API")
+# Define the tags for the API docs
+tags_metadata = [
+    {
+        "name": "Student Actions",
+        "description": "Endpoints used by the student's `submit.sh` script.",
+    },
+    {
+        "name": "Instructor Tools",
+        "description": "Secure endpoints for TAs to download submissions.",
+    },
+    {
+        "name": "General",
+        "description": "The root status page.",
+    },
+]
+
+app = FastAPI(title="Python Exam System API", openapi_tags=tags_metadata)
 
 # Batch download request model, used for post requests
 class BatchDownloadRequest(BaseModel):
@@ -32,7 +47,7 @@ class SingleDownloadRequest(BaseModel):
 MAX_FILE_SIZE = 10 * 1024 * 1024
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/", response_class=HTMLResponse, tags=["General"])
 async def root():
     """Root endpoint - API information"""
     html_content = """
@@ -133,7 +148,7 @@ async def root():
     return HTMLResponse(content=html_content, status_code=200)
 
 
-@app.post("/api/submit")
+@app.post("/api/submit", tags=["Student Actions"])
 async def submit_exam(file: UploadFile = File(...)):
     """
     Submit exam answers.
@@ -233,7 +248,7 @@ async def submit_exam(file: UploadFile = File(...)):
         )
 
 
-@app.post("/api/download-batch")
+@app.post("/api/download-batch", tags=["Instructor Tools"])
 async def download_batch(request: BatchDownloadRequest):
     """
     Download all submissions for a given exam code as a single zip file.
@@ -328,7 +343,7 @@ async def download_batch(request: BatchDownloadRequest):
         )
 
 
-@app.post("/api/download-single")
+@app.post("/api/download-single", tags=["Instructor Tools"])
 async def download_single(request: SingleDownloadRequest):
     """
     Download a single student's submission.
