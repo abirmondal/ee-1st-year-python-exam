@@ -123,7 +123,7 @@ echo "Making solution files editable..."
 chmod +w prob_* 2>/dev/null || true
 
 # Append start time (UTC) to student_info.txt
-echo "START_TIME_UTC: $(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> student_info.txt
+echo "START_TIME: $(TZ="Asia/Kolkata" date +'%Y-%m-%d %H:%M:%S %Z')" >> student_info.txt
 
 # Append start timestamp (Unix timestamp)
 echo "START_TIMESTAMP: $(date +%s)" >> student_info.txt
@@ -177,7 +177,7 @@ fi
 echo ""
 
 # Record submission time before preparing
-echo "SUBMIT_TIME_UTC: $(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> student_info.txt
+echo "SUBMIT_TIME: $(TZ="Asia/Kolkata" date +'%Y-%m-%d %H:%M:%S %Z')" >> student_info.txt
 echo "SUBMIT_TIMESTAMP: $(date +%s)" >> student_info.txt
 
 # Calculate total time
