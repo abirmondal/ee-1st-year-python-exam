@@ -24,14 +24,6 @@ if [ -z "$STUDENT_NAME" ]; then
     exit 1
 fi
 
-# Prompt for Exam Code
-read -p "Enter the Exam Code: " EXAM_CODE
-
-if [ -z "$EXAM_CODE" ]; then
-    echo "Error: Exam Code cannot be empty."
-    exit 1
-fi
-
 echo ""
 echo "Setting up exam for:"
 echo "  Name: $STUDENT_NAME"
@@ -58,34 +50,50 @@ echo "Creating student information file..."
 cat > student_info.txt << EOF
 ENROLLMENT_ID: $ENROLLMENT_ID
 STUDENT_NAME: $STUDENT_NAME
-EXAM_CODE: $EXAM_CODE
 EOF
 
 # Construct download URL for the exam zip file from Vercel Blob
 # TODO: Update this URL with your Vercel Blob project's public URL
 VERCEL_BLOB_BASE_URL="https://[YOUR-VERCEL-PROJECT-ID].blob.vercel-storage.com"
-DOWNLOAD_URL="${VERCEL_BLOB_BASE_URL}/public-exams/${EXAM_CODE}.zip"
 
-echo "Downloading exam files..."
-echo "URL: $DOWNLOAD_URL"
+while true; do
+    # Prompt for Exam Code inside the loop
+    read -p "Enter the Exam Code: " EXAM_CODE
 
-# Try to download the exam zip file using curl
-if command -v curl &> /dev/null; then
-    curl -L -o "${EXAM_CODE}.zip" "$DOWNLOAD_URL" -f -s -S
-    DOWNLOAD_STATUS=$?
-elif command -v wget &> /dev/null; then
-    wget -q -O "${EXAM_CODE}.zip" "$DOWNLOAD_URL"
-    DOWNLOAD_STATUS=$?
-else
-    echo "Error: Neither curl nor wget is available. Please install one of them."
-    exit 1
-fi
+    if [ -z "$EXAM_CODE" ]; then
+        echo "Error: Exam Code cannot be empty. Please try again."
+        continue
+    fi
 
-# Check if the download was successful
-if [ $DOWNLOAD_STATUS -ne 0 ] || [ ! -f "${EXAM_CODE}.zip" ]; then
-    echo "Error: Invalid Exam Code or network issue. Please check the code and try again."
-    exit 1
-fi
+    DOWNLOAD_URL="${VERCEL_BLOB_BASE_URL}/public-exams/${EXAM_CODE}.zip"
+    echo "Attempting to download exam files from: $DOWNLOAD_URL"
+
+    # Try to download the exam zip file
+    if command -v curl &> /dev/null; then
+        curl -L -o "${EXAM_CODE}.zip" "$DOWNLOAD_URL" -f -s -S
+        DOWNLOAD_STATUS=$?
+    elif command -v wget &> /dev/null; then
+        wget -q -O "${EXAM_CODE}.zip" "$DOWNLOAD_URL"
+        DOWNLOAD_STATUS=$?
+    else
+        echo "Error: Neither curl nor wget is available. Please contact your TA."
+        exit 1
+    fi
+
+    # Check if the download was successful
+    if [ $DOWNLOAD_STATUS -eq 0 ] && [ -f "${EXAM_CODE}.zip" ]; then
+        # Save the correct code to the info file
+        echo "EXAM_CODE: $EXAM_CODE" >> student_info.txt
+        break # Exit the loop on success
+    else
+        echo "--------------------------------------------------"
+        echo "✗ ERROR: Invalid Exam Code or network issue."
+        echo "  Please check the code and try again."
+        echo "--------------------------------------------------"
+        # Clean up failed download attempt
+        rm -f "${EXAM_CODE}.zip"
+    fi
+done
 
 echo "Download successful!"
 echo "Extracting exam files..."
