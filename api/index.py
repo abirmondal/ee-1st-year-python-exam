@@ -7,6 +7,7 @@ Submission-only system - TAs download submissions for manual grading
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse, HTMLResponse
 import io
+import os
 import zipfile
 from vercel_blob import put
 
@@ -172,8 +173,10 @@ async def submit_exam(file: UploadFile = File(...)):
                 detail="Invalid ZIP file. File appears to be corrupted."
             )
         
+        # Sanitize the filename to prevent path traversal
+        safe_filename = os.path.basename(file.filename)
         # Upload to Vercel Blob Storage
-        blob_path = f"submissions/{file.filename}"
+        blob_path = f"submissions/{safe_filename}"
         
         try:
             blob = put(
