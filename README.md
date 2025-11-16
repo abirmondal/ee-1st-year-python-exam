@@ -83,14 +83,18 @@ A complete Python & Shell-based CLI system for conducting exams. Manages setup a
 
 3. **Import the GitHub repository** you just created
 
-4. **Click Deploy** (no environment variables needed for submission-only system)
+4. **Click Deploy**
 
 5. **Set up Blob Storage**:
    - After deployment, go to the **Storage** tab
    - Create and link your Vercel Blob store
    - Vercel will automatically add the required blob environment variables
 
-6. **Automatic deployments**:
+6. **Add Environment Variable**:
+   - Go to **Settings** → **Environment Variables**
+   - Add `DOWNLOAD_SECRET` with a strong secret value (this will be used to secure download endpoints)
+
+7. **Automatic deployments**:
    - Just `git commit` and `git push` to your main branch
    - Vercel will automatically redeploy
 
@@ -178,12 +182,36 @@ A complete Python & Shell-based CLI system for conducting exams. Manages setup a
 
 This system is **submission-only**. To grade, you must download the files.
 
-1. **Go to your Vercel Project Dashboard**
-2. **Navigate to the Storage tab** and select your Blob store
-3. **All submissions are in the `submissions/` folder**, named as `<examcode>_<enrollmentid>.zip`
-   - Example: `cst101_STU12345.zip`
-4. **Download the files** for manual or local automated grading
-5. **Unzip and grade** using your preferred tools/methods
+#### Method 1: Using the Download Script (Recommended)
+
+1. **Make the script executable** (first time only):
+   ```bash
+   chmod +x download.sh
+   ```
+
+2. **Run the script**:
+   ```bash
+   ./download.sh
+   ```
+
+3. **Follow the prompts**:
+   - Enter your API Base URL (e.g., `https://your-project.vercel.app`)
+   - Enter your `DOWNLOAD_SECRET` (set in Vercel environment variables)
+   - Choose option 1 to download all submissions or option 2 for a single student
+
+#### Method 2: Manual URL Method
+
+You can also download directly using URLs:
+
+**Download all submissions for an exam:**
+```
+https://your-project.vercel.app/api/download-batch?exam_code=cst101&secret=YOUR_SECRET
+```
+
+**Download a single student's submission:**
+```
+https://your-project.vercel.app/api/download-single?exam_code=cst101&student_id=STU12345&secret=YOUR_SECRET
+```
 
 **Note**: Only the last submission from each student is kept (previous submissions are automatically overwritten).
 

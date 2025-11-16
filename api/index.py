@@ -5,11 +5,13 @@ Submission-only system - TAs download submissions for manual grading
 """
 
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.responses import JSONResponse, HTMLResponse, StreamingResponse
 import io
 import os
 import zipfile
+import requests
 from vercel_blob import put
+from vercel_blob import list as blob_list
 
 app = FastAPI(title="Python Exam System API")
 
@@ -102,6 +104,8 @@ async def root():
                         <a href="https://github.com/abirmondal/py-exam-cli" target="_blank">GitHub repository</a> 
                         for setup instructions.
                     </p>
+                    <p>Instructor Download (Batch): <code>/api/download-batch</code></p>
+                    <p>Instructor Download (Single): <code>/api/download-single</code></p>
                     <p style="margin-top:20px;">
                         ⭐ If you find this project useful, please consider giving it a star on 
                         <a href="https://github.com/abirmondal/py-exam-cli" target="_blank">GitHub</a>!
@@ -214,4 +218,174 @@ async def submit_exam(file: UploadFile = File(...)):
         raise HTTPException(
             status_code=500,
             detail=f"An unexpected error occurred: {str(e)}"
+        )
+
+
+@app.get("/api/download-batch")
+async def download_batch(exam_code: str, secret: str):
+    """
+    Download all submissions for a given exam code as a single zip file.
+    Requires authentication via DOWNLOAD_SECRET environment variable.
+    """
+    # Security: Validate secret
+    download_secret = os.environ.get("DOWNLOAD_SECRET")
+    if not download_secret or download_secret != secret:
+        raise HTTPException(
+            status_code=401,
+            detail="Unauthorized: Invalid or missing secret"
+        )
+    
+    # Validate exam_code
+    if not exam_code or not exam_code.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="Exam code is required"
+        )
+    
+    # Construct the file prefix for submissions
+    file_prefix = f"submissions/{exam_code}_"
+    
+    try:
+        # List all blobs matching the prefix
+        result = blob_list(prefix=file_prefix)
+        blobs = result.get('blobs', [])
+        
+        # Check if any submissions exist
+        if not blobs:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No submissions found for exam code: {exam_code}"
+            )
+        
+        # Create a zip file in memory
+        memory_zip = io.BytesIO()
+        
+        with zipfile.ZipFile(memory_zip, 'w', zipfile.ZIP_DEFLATED) as main_zip:
+            for blob in blobs:
+                try:
+                    # Download the student's zip file
+                    blob_url = blob.get('url')
+                    response = requests.get(blob_url)
+                    response.raise_for_status()
+                    student_zip_content = response.content
+                    
+                    # Extract student_id from the pathname
+                    # Format: submissions/{exam_code}_{student_id}.zip
+                    pathname = blob.get('pathname', '')
+                    filename = pathname.split('/')[-1]  # Get the filename
+                    student_id = filename.replace(f"{exam_code}_", "").replace(".zip", "")
+                    
+                    # Unzip the student's submission in memory
+                    student_zip = io.BytesIO(student_zip_content)
+                    
+                    with zipfile.ZipFile(student_zip, 'r') as student_zf:
+                        # Add each file from student's zip to the main zip
+                        # Place them in a folder named after the student_id
+                        for file_info in student_zf.infolist():
+                            file_data = student_zf.read(file_info.filename)
+                            # Create new path: student_id/original_filename
+                            new_path = f"{student_id}/{file_info.filename}"
+                            main_zip.writestr(new_path, file_data)
+                
+                except Exception as e:
+                    # If one student's zip is corrupt, log error and continue
+                    error_msg = f"Error processing submission: {str(e)}\n"
+                    error_path = f"{student_id}/_ERROR.txt"
+                    main_zip.writestr(error_path, error_msg)
+                    continue
+        
+        # Seek to the beginning of the in-memory zip
+        memory_zip.seek(0)
+        
+        # Return the zip file as a streaming response
+        filename = f"{exam_code}_all_submissions.zip"
+        return StreamingResponse(
+            memory_zip,
+            media_type="application/zip",
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}"
+            }
+        )
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to create batch download: {str(e)}"
+        )
+
+
+@app.get("/api/download-single")
+async def download_single(exam_code: str, student_id: str, secret: str):
+    """
+    Download a single student's submission.
+    Requires authentication via DOWNLOAD_SECRET environment variable.
+    """
+    # Security: Validate secret
+    download_secret = os.environ.get("DOWNLOAD_SECRET")
+    if not download_secret or download_secret != secret:
+        raise HTTPException(
+            status_code=401,
+            detail="Unauthorized: Invalid or missing secret"
+        )
+    
+    # Validate parameters
+    if not exam_code or not exam_code.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="Exam code is required"
+        )
+    
+    if not student_id or not student_id.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="Student ID is required"
+        )
+    
+    # Construct the exact blob path
+    blob_path = f"submissions/{exam_code}_{student_id}.zip"
+    
+    try:
+        # First, try to find the blob using list
+        result = blob_list(prefix=blob_path)
+        blobs = result.get('blobs', [])
+        
+        # Find exact match
+        blob_url = None
+        for blob in blobs:
+            if blob.get('pathname') == blob_path:
+                blob_url = blob.get('url')
+                break
+        
+        if not blob_url:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Submission not found for exam code: {exam_code}, student ID: {student_id}"
+            )
+        
+        # Download the file
+        response = requests.get(blob_url)
+        response.raise_for_status()
+        file_data = response.content
+        
+        # Create a streaming response
+        file_stream = io.BytesIO(file_data)
+        filename = f"{exam_code}_{student_id}.zip"
+        
+        return StreamingResponse(
+            file_stream,
+            media_type="application/zip",
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}"
+            }
+        )
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        error_message = str(e)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to download submission: {error_message}"
         )

@@ -48,7 +48,7 @@ git push -u origin main
 
 #### 3. Deploy
 
-Click **Deploy** (no environment variables needed for submission-only system)
+Click **Deploy**
 
 #### 4. Set Up Blob Storage
 
@@ -61,6 +61,14 @@ After deployment completes:
 5. Click **Create**
 
 Vercel will automatically configure the `BLOB_READ_WRITE_TOKEN` environment variable.
+
+#### 4.5. Add DOWNLOAD_SECRET Environment Variable
+
+1. Go to **Settings** → **Environment Variables**
+2. Add a new environment variable:
+   - Name: `DOWNLOAD_SECRET`
+   - Value: A strong secret string (e.g., a long random string)
+3. This secret will be required to access the secure download endpoints
 
 #### 5. Get Your Blob Storage URL
 
@@ -338,12 +346,41 @@ https://your-blob-url.blob.vercel-storage.com/public-exams/myexam101.zip
 
 This is a **submission-only system**. To grade exams:
 
-1. **Go to your Vercel Project Dashboard**
-2. **Navigate to Storage** → Select your Blob store
-3. **Browse the `submissions/` folder**
-4. **Download submission files** - they're named as `{examcode}_{enrollmentid}.zip`
-   - Example: `cst101_STU12345.zip`
-5. **Unzip and grade** using your preferred tools/methods
+#### Method 1: Using the Download Script (Recommended)
+
+1. **Make the script executable** (first time only):
+   ```bash
+   chmod +x download.sh
+   ```
+
+2. **Run the script**:
+   ```bash
+   ./download.sh
+   ```
+
+3. **Follow the prompts**:
+   - Enter your API Base URL (e.g., `https://your-project.vercel.app`)
+   - Enter your `DOWNLOAD_SECRET` (the value you set in Vercel environment variables)
+   - Choose option 1 to download all submissions for an exam (batch download)
+   - Choose option 2 to download a single student's submission
+
+The batch download will create a zip file containing all submissions, with each student's files organized in separate folders.
+
+#### Method 2: Manual URL Method
+
+You can also download directly using URLs in your browser or with curl:
+
+**Download all submissions for an exam:**
+```
+https://your-project.vercel.app/api/download-batch?exam_code=cst101&secret=YOUR_SECRET
+```
+
+**Download a single student's submission:**
+```
+https://your-project.vercel.app/api/download-single?exam_code=cst101&student_id=STU12345&secret=YOUR_SECRET
+```
+
+#### What's in the Downloads
 
 **Each submission contains:**
 - `prob_*` files (student solutions)
