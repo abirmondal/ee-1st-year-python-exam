@@ -54,7 +54,7 @@ EOF
 
 # Construct download URL for the exam zip file from Vercel Blob
 # TODO: Update this URL with your Vercel Blob project's public URL
-VERCEL_BLOB_BASE_URL="https://[YOUR-VERCEL-PROJECT-ID].blob.vercel-storage.com"
+VERCEL_BLOB_BASE_URL="https://kbnyowyqydxghkjz.public.blob.vercel-storage.com"
 
 while true; do
     # Prompt for Exam Code inside the loop
