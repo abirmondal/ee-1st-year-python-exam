@@ -42,10 +42,11 @@ while true; do
             fi
             
             FILENAME="${EXAM_CODE}_all_submissions.zip"
-            URL="${API_BASE_URL}/api/download-batch?exam_code=${EXAM_CODE}&secret=${DOWNLOAD_SECRET}"
+            URL="${API_BASE_URL}/api/download-batch"
             
             echo "Downloading all submissions for exam: ${EXAM_CODE}..."
-            curl -L -o "$FILENAME" "$URL"
+            JSON_BODY="{\"exam_code\": \"$EXAM_CODE\", \"secret\": \"$DOWNLOAD_SECRET\"}"
+            curl -L -o "$FILENAME" -X POST -H "Content-Type: application/json" -d "$JSON_BODY" "$URL"
             
             # Validate the download
             if [ -f "$FILENAME" ]; then
@@ -73,10 +74,11 @@ while true; do
             fi
             
             FILENAME="${EXAM_CODE}_${STUDENT_ID}.zip"
-            URL="${API_BASE_URL}/api/download-single?exam_code=${EXAM_CODE}&student_id=${STUDENT_ID}&secret=${DOWNLOAD_SECRET}"
+            URL="${API_BASE_URL}/api/download-single"
             
             echo "Downloading submission for ${STUDENT_ID}..."
-            curl -L -o "$FILENAME" "$URL"
+            JSON_BODY="{\"exam_code\": \"$EXAM_CODE\", \"student_id\": \"$STUDENT_ID\", \"secret\": \"$DOWNLOAD_SECRET\"}"
+            curl -L -o "$FILENAME" -X POST -H "Content-Type: application/json" -d "$JSON_BODY" "$URL"
             
             # Validate the download
             if [ -f "$FILENAME" ]; then
