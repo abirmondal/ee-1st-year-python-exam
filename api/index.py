@@ -9,8 +9,9 @@ from fastapi.responses import JSONResponse, HTMLResponse, StreamingResponse
 import io
 import os
 import zipfile
+import requests
 from vercel_blob import put
-from vercel_blob import list as blob_list, get as blob_get
+from vercel_blob import list as blob_list
 from pydantic import BaseModel
 from typing import Optional
 
@@ -275,7 +276,10 @@ async def download_batch(request: BatchDownloadRequest):
             for blob in blobs:
                 try:
                     # Download the student's zip file
-                    student_zip_content = blob_get(blob['url']).read()
+                    blob_url = blob.get('url')
+                    response = requests.get(blob_url)
+                    response.raise_for_status()  # Will raise an error if download fails
+                    student_zip_content = response.content
                     
                     # Extract student_id from the pathname
                     # Format: submissions/{exam_code}_{student_id}.zip
@@ -355,9 +359,28 @@ async def download_single(request: SingleDownloadRequest):
     blob_path = f"submissions/{request.exam_code}_{request.student_id}.zip"
     
     try:
-        # Download the file directly using blob_get
-        # blob_get() will raise an exception if the file doesn't exist (404)
-        file_data = blob_get(blob_path).read()
+        # 1. List blobs to find the exact file
+        result = blob_list(options={'prefix': blob_path})
+        blobs = result.get('blobs', [])
+
+        # 2. Find the exact match
+        blob_url = None
+        for blob in blobs:
+            if blob.get('pathname') == blob_path:
+                blob_url = blob.get('url')
+                break
+
+        # 3. If no match, raise 404
+        if not blob_url:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Submission not found for exam code: {request.exam_code}, student ID: {request.student_id}"
+            )
+
+        # 4. Download the file using requests
+        response = requests.get(blob_url)
+        response.raise_for_status()  # Check for download errors
+        file_data = response.content
 
         # Create a streaming response
         file_stream = io.BytesIO(file_data)
