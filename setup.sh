@@ -169,26 +169,33 @@ if [ ! -f "student_info.txt" ]; then
 fi
 ORIGINAL_ID=$(grep 'ENROLLMENT_ID:' student_info.txt | cut -d' ' -f2)
 
-# Prompt for confirmation
-read -p "Please confirm your Enrollment ID [$ORIGINAL_ID]: " CONFIRMED_ID
+# Confirm Enrollment ID loop
+while true; do
+    read -p "Please confirm your Enrollment ID [$ORIGINAL_ID]: " CONFIRMED_ID
 
-# Use original ID if user just presses Enter
-if [ -z "$CONFIRMED_ID" ]; then
-    CONFIRMED_ID="$ORIGINAL_ID"
-fi
+    # Check 1: Is it empty?
+    if [ -z "$CONFIRMED_ID" ]; then
+        echo "--------------------------------------------------"
+        echo "✗ ERROR: ID cannot be empty. Please try again."
+        echo "--------------------------------------------------"
+        continue
+    fi
 
-# Validate Enrollment ID
-if [ "$CONFIRMED_ID" != "$ORIGINAL_ID" ]; then
-    echo "==================================================================="
-    echo "✗ ERROR: ID MISMATCH!"
-    echo "==================================================================="
-    echo "  You entered:    $CONFIRMED_ID"
-    echo "  This exam belongs to: $ORIGINAL_ID"
-    echo ""
-    echo "  Submission ABORTED. Please run ./submit.sh again."
-    echo "==================================================================="
-    exit 1
-fi
+    # Check 2: Does it match?
+    if [ "$CONFIRMED_ID" != "$ORIGINAL_ID" ]; then
+        echo "==================================================================="
+        echo "✗ ERROR: ID MISMATCH!"
+        echo "==================================================================="
+        echo "  You entered:    $CONFIRMED_ID"
+        echo "  This exam belongs to: $ORIGINAL_ID"
+        echo "  Please try again."
+        echo "==================================================================="
+        continue
+    fi
+    
+    # If we are here, the ID is not empty AND it matches.
+    break
+done
 
 echo ""
 
